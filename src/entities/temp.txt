@@ -1,0 +1,217 @@
+import { Entity, PrimaryKey, Property, ManyToOne, OneToMany, Collection } from '@mikro-orm/core';
+
+// ----------------------
+// 1. Category (Categoria)
+// ----------------------
+@Entity()
+export class Category {
+  @PrimaryKey()
+  id!: number;
+
+  @Property()
+  name!: string;
+
+  @ManyToOne(() => Category, { nullable: true })
+  parentCategory?: Category;
+
+  @OneToMany(() => Category, (category) => category.parentCategory)
+  subcategories = new Collection<Category>(this);
+}
+
+// ----------------------
+// 2. Unit (Unidad)
+// ----------------------
+@Entity()
+export class Unit {
+  @PrimaryKey()
+  id!: number;
+
+  @Property()
+  name!: string; // e.g., "Gigabyte"
+
+  @Property()
+  symbol!: string; // e.g., "GB"
+}
+
+// ----------------------
+// 3. Attribute (Atributo)
+// ----------------------
+@Entity()
+export class Attribute {
+  @PrimaryKey()
+  id!: number;
+
+  @Property()
+  name!: string; // e.g., "Storage", "Color", "RAM"
+
+  @ManyToOne(() => Unit, { nullable: true })
+  unit?: Unit;
+}
+
+// ----------------------
+// 4. Attribute Value (Atributo Valor)
+// ----------------------
+@Entity()
+export class AttributeValue {
+  @PrimaryKey()
+  id!: number;
+
+  @ManyToOne(() => Attribute)
+  attribute!: Attribute;
+
+  @Property()
+  value!: string; // e.g., "128 GB", "Black", "6 GB"
+
+  @ManyToOne(() => Unit, { nullable: true })
+  unit?: Unit;
+}
+
+// ----------------------
+// 5. Product (Producto)
+// ----------------------
+@Entity()
+export class Product {
+  @PrimaryKey()
+  id!: number;
+
+  @Property()
+  name!: string; // e.g., "iPhone", "Galaxy"
+
+  @ManyToOne(() => Category)
+  category!: Category;
+
+  @ManyToOne(() => Brand)
+  brand!: Brand;
+
+  @OneToMany(() => Model, (model) => model.product)
+  models = new Collection<Model>(this);
+}
+
+// ----------------------
+// 6. Model (Modelo)
+// ----------------------
+@Entity()
+export class Model {
+  @PrimaryKey()
+  id!: number;
+
+  @Property()
+  name!: string; // e.g., "iPhone 15"
+
+  @ManyToOne(() => Product)
+  product!: Product;
+
+  @OneToMany(() => ModelVariant, (variant) => variant.model)
+  variants = new Collection<ModelVariant>(this);
+}
+
+// ----------------------
+// 7. Model Variant (Modelo Variante)
+// ----------------------
+@Entity()
+export class ModelVariant {
+  @PrimaryKey()
+  id!: number;
+
+  @Property()
+  sku!: string; // e.g., "IP15-128-BL-White"
+
+  @Property()
+  price!: number; // Price of the variant
+
+  @Property()
+  stock!: number; // Available stock for this variant
+
+  @ManyToOne(() => Model)
+  model!: Model;
+
+  @OneToMany(() => ModelVariantAttributeValue, (mva) => mva.variant)
+  attributeValues = new Collection<ModelVariantAttributeValue>(this);
+}
+
+// ----------------------
+// 8. Model Variant Attribute Value (Modelo Variante Atributo Valor)
+// ----------------------
+@Entity()
+export class ModelVariantAttributeValue {
+  @PrimaryKey()
+  id!: number;
+
+  @ManyToOne(() => ModelVariant)
+  variant!: ModelVariant;
+
+  @ManyToOne(() => AttributeValue)
+  attributeValue!: AttributeValue;
+}
+
+// ----------------------
+// 9. Brand (Marca)
+// ----------------------
+@Entity()
+export class Brand {
+  @PrimaryKey()
+  id!: number;
+
+  @Property()
+  name!: string; // e.g., "Apple", "Samsung"
+}
+
+// ----------------------
+// 10. Discount (Descuento)
+// ----------------------
+@Entity()
+export class Discount {
+  @PrimaryKey()
+  id!: number;
+
+  @ManyToOne(() => ModelVariant)
+  modelVariant!: ModelVariant;
+
+  @Property()
+  percentage!: number; // e.g., 10 for a 10% discount
+
+  @Property()
+  startDate!: Date;
+
+  @Property()
+  endDate!: Date;
+}
+
+// ----------------------
+// 11. Product Image (Imagen Producto)
+// ----------------------
+@Entity()
+export class ProductImage {
+  @PrimaryKey()
+  id!: number;
+
+  @Property()
+  imageUrl!: string; // URL of the image
+
+  @Property()
+  imageType!: string; // e.g., "main", "gallery"
+
+  @ManyToOne(() => ModelVariant)
+  modelVariant!: ModelVariant;
+}
+
+// ----------------------
+// 12. Product Review (Valoracion Producto)
+// ----------------------
+@Entity()
+export class ProductReview {
+  @PrimaryKey()
+  id!: number;
+
+  @ManyToOne(() => ModelVariant)
+  modelVariant!: ModelVariant;
+
+  @Property()
+  rating!: number; // e.g., 1 to 5
+
+  @Property()
+  comment!: string;
+
+  @Property()
+  createdAt!: Date;
+}
