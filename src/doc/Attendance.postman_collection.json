@@ -1,0 +1,1964 @@
+{
+	"info": {
+		"_postman_id": "0dfe4224-0b4a-4a26-9d03-1ad7f1e7b41c",
+		"name": "Attendance",
+		"description": "# Checador de asistencia\n\n## 📋 Descripción General\n\nEsta colección de Postman contiene todas las operaciones CRUD para un sistema de gestión de asistencia laboral desarrollado en Node.js con TypeScript y MikroORM. El sistema permite gestionar empleados, turnos, asistencias, permisos, vacaciones y días festivos.\n\n## 🏗️ Arquitectura del Sistema\n\n### Entidades Principales\n\n- **Employee**: Empleados del sistema\n    \n- **Shift**: Turnos de trabajo con configuración flexible\n    \n- **DailyShift**: Configuración diaria de turnos\n    \n- **WorkPeriod**: Períodos de trabajo dentro de un turno diario\n    \n- **Attendance**: Registros de asistencia\n    \n- **AttendancePeriod**: Períodos específicos de asistencia\n    \n- **Permission**: Permisos y ausencias\n    \n- **Vacation**: Períodos vacacionales\n    \n- **Holiday**: Días festivos\n    \n- **Overtime**: Horas extras\n    \n- **User**: Usuarios administrativos\n    \n\n### Características del Sistema\n\n- ✅ Soft delete implementado en todas las entidades\n    \n- ✅ Turnos flexibles con múltiples períodos de trabajo\n    \n- ✅ Sistema de tolerancia configurable\n    \n- ✅ Gestión de descansos por período\n    \n- ✅ Control de horas extras\n    \n- ✅ Sistema de permisos con compensación unitaria o diferida\n    \n- ✅ Control de empleados en vacaciones\n    \n- ✅ Administración de dias feriados\n    \n- ✅ Autenticación por identificador y contraseña\n    \n\n## 📁 Estructura de la Colección\n\n``` markdown\nst=>start: Start\nop=>operation: Your Operation\ncond=>condition: Yes or No?\ne=>end\nst->op->cond\ncond(yes)->e\ncond(no)->op\n\n ```\n\n## 🔧 Configuración de Variables\n\n### Variables de Colección:\n\n- `BASE_URL`: `http://localhost:3005`\n    \n- `EMPLOYEE_ID`: ID del empleado creado (auto-asignado)\n    \n- `SHIFT_ID`: ID del turno creado (auto-asignado)\n    \n\n### Scripts Automatizados:\n\n- **Pre-request Scripts**: Configuración automática de variables\n    \n- **Test Scripts**: Captura automática de IDs de respuesta\n    \n\n## 🚀 Flujo de Uso Recomendado\n\n1. **Crear Turno**: Configura turnos con períodos de trabajo flexibles\n    \n2. **Crear Empleado**: Asigna empleados con turno inicial\n    \n3. **Configurar Días Festivos**: Define el calendario laboral\n    \n4. **Gestionar Vacaciones**: Programa períodos vacacionales\n    \n5. **Procesar Permisos**: Maneja ausencias y permisos especiales\n    \n6. **Registrar Asistencia**: Usa el endpoint de check para fichajes\n    \n\n## 📊 Estados del Sistema\n\n### Estados de Asistencia (ATTENDANCE_STATUS):\n\n- `PRESENT`: Presente\n    \n- `ABSENT`: Ausente\n    \n- `LATE`: Tardanza\n    \n- `PARTIAL`: Asistencia parcial\n    \n\n### Estados de Período (PERIOD_STATUS):\n\n- `PENDING`: Pendiente\n    \n- `COMPLETED`: Completado\n    \n- `MISSED`: Perdido\n    \n\n### Estados de Autorización (AUTHORIZATION_STATUS):\n\n- `PENDING`: Pendiente\n    \n- `APPROVED`: Aprobado\n    \n- `REJECTED`: Rechazado\n    \n\n### Tipos de Horas Extra (OVERTIME_TYPE):\n\n- `REGULAR`: Regulares\n    \n- `HOLIDAY`: Días festivos\n    \n- `NIGHT`: Nocturnas\n    \n\n## 🔒 Consideraciones de Seguridad\n\n- Autenticación basada en identificador y contraseña\n    \n- Soft delete para mantener integridad de datos\n    \n- Validación de períodos de trabajo\n    \n- Control de tolerancias configurables\n    \n\n## 📈 Métricas y Reportes\n\nEl sistema permite generar reportes de:\n\n- Asistencia por empleado y período\n    \n- Horas trabajadas vs. programadas\n    \n- Tardanzas y ausencias\n    \n- Horas extras realizadas\n    \n- Utilización de permisos y vacaciones\n    \n\nEndFragment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38256042"
+	},
+	"item": [
+		{
+			"name": "Shift",
+			"item": [
+				{
+					"name": "GetAllShifts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.json()[0].id)\r",
+									"    pm.collectionVariables.set(\"SHIFT_ID\", pm.response.json()[0].id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/shifts",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"shifts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetShiftById",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/shifts/{{SHIFT_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"shifts",
+								"{{SHIFT_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateShift",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Turno Mixto\",\r\n  \"checkIn\": \"08:00\",\r\n  \"breakStart\": \"12:00\",\r\n  \"breakEnd\": \"13:00\",\r\n  \"checkOut\": \"18:00\",\r\n  \"toleranceMinutes\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/shifts/{{SHIFT_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"shifts",
+								"{{SHIFT_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteShift",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/shifts/{{SHIFT_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"shifts",
+								"{{SHIFT_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateShift",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"SHIFT_ID\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Programador\",\r\n  \"toleranceMinutes\": 5,\r\n  \"dailyShifts\": [\r\n    {\r\n      \"dayOfWeek\": 0,\r\n      \"workPeriods\": [\r\n        {\r\n          \"checkIn\": \"08:00\",\r\n          \"breakStart\": \"14:00\",\r\n          \"breakEnd\": \"15:00\",\r\n          \"checkOut\": \"18:00\",\r\n          \"order\": 1,\r\n          \"description\": \"Jornada Completa\"\r\n        }\r\n      ]\r\n    },\r\n    {\r\n      \"dayOfWeek\": 1,\r\n      \"workPeriods\": [\r\n        {\r\n          \"checkIn\": \"08:00\",\r\n          \"breakStart\": \"14:00\",\r\n          \"breakEnd\": \"15:00\",\r\n          \"checkOut\": \"18:00\",\r\n          \"order\": 1,\r\n          \"description\": \"Jornada Completa\"\r\n        }\r\n      ]\r\n    },\r\n    {\r\n      \"dayOfWeek\": 2,\r\n      \"workPeriods\": [\r\n        {\r\n          \"checkIn\": \"08:00\",\r\n          \"breakStart\": \"14:00\",\r\n          \"breakEnd\": \"15:00\",\r\n          \"checkOut\": \"18:00\",\r\n          \"order\": 1,\r\n          \"description\": \"Jornada Completa\"\r\n        }\r\n      ]\r\n    },\r\n    {\r\n      \"dayOfWeek\": 3,\r\n      \"workPeriods\": [\r\n        {\r\n          \"checkIn\": \"08:00\",\r\n          \"breakStart\": \"14:00\",\r\n          \"breakEnd\": \"15:00\",\r\n          \"checkOut\": \"18:00\",\r\n          \"order\": 1,\r\n          \"description\": \"Jornada Completa\"\r\n        }\r\n      ]\r\n    },\r\n    {\r\n      \"dayOfWeek\": 4,\r\n      \"workPeriods\": [\r\n        {\r\n          \"checkIn\": \"08:00\",\r\n          \"breakStart\": \"14:00\",\r\n          \"breakEnd\": \"15:00\",\r\n          \"checkOut\": \"18:00\",\r\n          \"order\": 1,\r\n          \"description\": \"Jornada Completa\"\r\n        }\r\n      ]\r\n    },\r\n    {\r\n      \"dayOfWeek\": 5,\r\n      \"workPeriods\": [\r\n        {\r\n          \"checkIn\": \"09:00\",\r\n          \"checkOut\": \"14:00\",\r\n          \"order\": 1,\r\n          \"description\": \"Mañana corta\"\r\n        }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/shifts",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"shifts"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "### 🔄 **Shift Management**\n\nGestión completa de turnos de trabajo con configuración flexible.\n\n#### Endpoints Disponibles:\n\n- `GET /api/v1/shifts` - Obtener todos los turnos\n    \n- `GET /api/v1/shifts/{id}` - Obtener turno por ID\n    \n- `POST /api/v1/shifts` - Crear nuevo turno\n    \n- `PUT /api/v1/shifts/{id}` - Actualizar turno\n    \n- `DELETE /api/v1/shifts/{id}` - Eliminar turno\n    \n\n#### Estructura de Datos Body:\n\n``` json\n{\n  \"name\": \"Programador\",\n  \"toleranceMinutes\": 5,\n  \"dailyShifts\": [\n    {\n      \"dayOfWeek\": 0,\n      \"workPeriods\": [\n        {\n          \"checkIn\": \"08:00\",\n          \"breakStart\": \"14:00\",\n          \"breakEnd\": \"15:00\",\n          \"checkOut\": \"18:00\",\n          \"order\": 1,\n          \"description\": \"Jornada Completa\"\n        }\n      ]\n    }\n  ]\n}\n\n ```"
+		},
+		{
+			"name": "DailyShift",
+			"item": [
+				{
+					"name": "GetAllDailyShift",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.json()[0].id)\r",
+									"pm.collectionVariables.set(\"DAILY_SHIFT_ID\", pm.response.json()[0].id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/dailyshifts",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dailyshifts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetDailyShiftById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/dailyshifts/7b3f8ea8-1008-4dbc-b0c8-be97b116d98d",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dailyshifts",
+								"7b3f8ea8-1008-4dbc-b0c8-be97b116d98d"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateDailyShift",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const shiftId = pm.collectionVariables.get(\"SHIFT_ID\");\r",
+									"\r",
+									"let body = JSON.parse(pm.request.body.raw);\r",
+									"\r",
+									"// Validaciones simples\r",
+									"if (!shiftId) {\r",
+									"  console.warn(\"⚠️ SHIFT_ID no está definido en el entorno\");\r",
+									"  throw new Error(\"El Id del horario no está definido en las variables de entorno de postman\")\r",
+									"} else{\r",
+									"    body.shiftId = shiftId;\r",
+									"}\r",
+									"\r",
+									"pm.request.body.raw = JSON.stringify(body, null, 2);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"shiftId\": \"1\",\r\n  \"dayOfWeek\": 0,\r\n  \"checkIn\": \"07:00\",\r\n  \"breakStart\": \"14:00\",\r\n  \"breakEnd\": \"14:00\",\r\n  \"checkOut\": \"17:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/dailyshifts/{{DAILY_SHIFT_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dailyshifts",
+								"{{DAILY_SHIFT_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteDailyShift",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/dailyshifts/7b3f8ea8-1008-4dbc-b0c8-be97b116d98d",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dailyshifts",
+								"7b3f8ea8-1008-4dbc-b0c8-be97b116d98d"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "### 📅 **DailyShift Management**\n\nConfiguración específica de turnos por día de la semana.\n\n#### Endpoints Disponibles:\n\n- `GET /api/v1/dailyshifts` - Obtener todas las configuraciones diarias\n    \n- `GET /api/v1/dailyshifts/{id}` - Obtener configuración por ID\n    \n- `PUT /api/v1/dailyshifts/{id}` - Actualizar configuración diaria\n    \n- `DELETE /api/v1/dailyshifts/{id}` - Eliminar configuración diaria"
+		},
+		{
+			"name": "WorkPeriod",
+			"item": [
+				{
+					"name": "GetAllWorkPeriods",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.json()[0].id)\r",
+									"pm.collectionVariables.set(\"WORK_PERIOD_ID\", pm.response.json()[0].id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/workperiods",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workperiods"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetWorkPeriodById",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"WORK_PERIOD_ID\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/workperiods/{{WORK_PERIOD_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workperiods",
+								"{{WORK_PERIOD_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateWorkPeriod",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"dailyShift\": \"{{DAILY_SHIFT_ID}}\",\r\n  \"checkIn\": \"07:00\",\r\n  \"breakStart\": \"14:00\",\r\n  \"breakEnd\": \"14:00\",\r\n  \"checkOut\": \"17:00\",\r\n  \"order\": 1,\r\n  \"description\": \"Descripcion nueva\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/workperiods/{{WORK_PERIOD_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workperiods",
+								"{{WORK_PERIOD_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteWorkPeriod",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/dailyshifts/{{WORK_PERIOD_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dailyshifts",
+								"{{WORK_PERIOD_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employee",
+			"item": [
+				{
+					"name": "GetAllEmployees",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.json()[0].id)\r",
+									"    pm.collectionVariables.set(\"EMPLOYEE_ID\", pm.response.json()[0].id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/employees",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetEmployeeById",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/employees/b4920d4e-6beb-49f5-915c-e3ec9eae0a71",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employees",
+								"b4920d4e-6beb-49f5-915c-e3ec9eae0a71"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateEmployee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"EMPLOYEE_ID\", pm.response.json().id);\r",
+									"let body = pm.request.body.raw;\r",
+									"let jsonBody = JSON.parse(body);\r",
+									"pm.collectionVariables.set(\"EMPLOYEE_IDENTIFIER\", jsonBody.identifier);\r",
+									"pm.collectionVariables.set(\"EMPLOYEE_PASSWORD\", jsonBody.password);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const shiftId = pm.collectionVariables.get(\"SHIFT_ID\");\r",
+									"\r",
+									"let body = JSON.parse(pm.request.body.raw);\r",
+									"\r",
+									"// Validacion simple\r",
+									"if (!shiftId) {\r",
+									"  console.warn(\"⚠️ SHIFT_ID no está definido en el entorno\");\r",
+									"  throw new Error(\"El Id del horario no está definido en las variables de entorno de postman\")\r",
+									"} else{\r",
+									"    body.initialShiftId = shiftId;\r",
+									"}\r",
+									"\r",
+									"pm.request.body.raw = JSON.stringify(body, null, 2);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"identifier\": \"EMP01\",\r\n  \"name\": \"Laura Martínez\",\r\n  \"password\": \"contraseña123\",\r\n  \"phoneNumber\": \"+521112223334\",\r\n  \"fingerprint\": \"huella123\",\r\n  \"hireDate\": \"2025-06-03\",\r\n  \"isActive\": true,\r\n  \"initialShiftId\": \"1\",\r\n  \"initialShiftStartDate\": \"2025-06-03\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/employees",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employees"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ReassignEmployeeShift",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const employeeId = pm.collectionVariables.get(\"EMPLOYEE_ID\");\r",
+									"const shiftId = pm.collectionVariables.get(\"SHIFT_ID\");\r",
+									"\r",
+									"let body = JSON.parse(pm.request.body.raw);\r",
+									"\r",
+									"// Validaciones simples\r",
+									"if (!employeeId) {\r",
+									"  console.warn(\"⚠️ EMPLOYEE_ID no está definido en el entorno\");\r",
+									"  throw new Error(\"El Id del empleado no está definido en las variables de entorno de postman\")\r",
+									"}else{\r",
+									"    body.employeesId = [employeeId];\r",
+									"}\r",
+									"if (!shiftId) {\r",
+									"  console.warn(\"⚠️ SHIFT_ID no está definido en el entorno\");\r",
+									"  throw new Error(\"El Id del horario no está definido en las variables de entorno de postman\")\r",
+									"} else{\r",
+									"    body.shiftId = shiftId;\r",
+									"}\r",
+									"\r",
+									"pm.request.body.raw = JSON.stringify(body, null, 2);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"employeesId\": [\"1\"],\r\n    \"shiftId\": \"1\",\r\n    \"startDate\": \"2025-06-23\",\r\n    \"endDate\": \"2025-06-23\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/employees/reassignShift",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employees",
+								"reassignShift"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateEmployee",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const shiftId = pm.collectionVariables.get(\"SHIFT_ID\");\r",
+									"\r",
+									"let body = JSON.parse(pm.request.body.raw);\r",
+									"\r",
+									"// Validaciones simples\r",
+									"if (!shiftId) {\r",
+									"  console.warn(\"⚠️ SHIFT_ID no está definido en el entorno\");\r",
+									"  throw new Error(\"El Id del horario no está definido en las variables de entorno de postman\")\r",
+									"} else{\r",
+									"    body.initialShiftId = shiftId;\r",
+									"}\r",
+									"\r",
+									"pm.request.body.raw = JSON.stringify(body, null, 2);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"identifier\": \"EMP001\",\r\n  \"name\": \"Laura Martínez\",\r\n  \"password\": \"contraseña123\",\r\n  \"phoneNumber\": \"+521112223334\",\r\n  \"fingerprint\": \"huella123\",\r\n  \"hireDate\": \"2024-06-01T00:00:00.000Z\",\r\n  \"isActive\": true,\r\n  \"initialShiftId\": \"c1bb7330-eea3-42e5-8cae-e3ac169e24a0\",\r\n  \"initialShiftStartDate\": \"2024-06-03T08:00:00.000Z\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/employees/b4920d4e-6beb-49f5-915c-e3ec9eae0a71",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employees",
+								"b4920d4e-6beb-49f5-915c-e3ec9eae0a71"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UnassignEmployee",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"identifier\": \"EMP001\",\r\n  \"name\": \"Laura Martínez\",\r\n  \"password\": \"contraseña123\",\r\n  \"phoneNumber\": \"+521112223334\",\r\n  \"fingerprint\": \"huella123\",\r\n  \"hireDate\": \"2024-06-01T00:00:00.000Z\",\r\n  \"isActive\": true,\r\n  \"initialShiftId\": \"c1bb7330-eea3-42e5-8cae-e3ac169e24a0\",\r\n  \"initialShiftStartDate\": \"2024-06-03T08:00:00.000Z\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/employees/unassignshift/b4920d4e-6beb-49f5-915c-e3ec9eae0a71",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employees",
+								"unassignshift",
+								"b4920d4e-6beb-49f5-915c-e3ec9eae0a71"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteEmployee",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/employees/{{EMPLOYEE_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employees",
+								"{{EMPLOYEE_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "### 👥 **Employee Management**\n\nGestión completa de empleados con asignación de turnos iniciales.\n\n#### Endpoints Disponibles:\n\n- `GET /api/v1/employees` - Obtener todos los empleados\n    \n- `GET /api/v1/employees/{id}` - Obtener empleado por ID\n    \n- `POST /api/v1/employees` - Crear nuevo empleado\n    \n- `PUT /api/v1/employees/{id}` - Actualizar empleado\n    \n- `DELETE /api/v1/employees/{id}` - Eliminar empleado\n    \n\n#### Estructura de Datos:\n\n``` json\n{\n  \"identifier\": \"EMP004\",\n  \"name\": \"Laura Martínez\",\n  \"password\": \"contraseña123\",\n  \"phoneNumber\": \"+521112223334\",\n  \"fingerprint\": \"huella123\",\n  \"hireDate\": \"2025-06-03\",\n  \"isActive\": true,\n  \"initialShiftId\": \"\",\n  \"initialShiftStartDate\": \"2025-06-03\"\n}\n\n ```"
+		},
+		{
+			"name": "Holiday",
+			"item": [
+				{
+					"name": "GetAllHolidays",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.json()[0].id)\r",
+									"    pm.collectionVariables.set(\"HOLIDAY_ID\", pm.response.json()[0].id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/holidays",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"holidays"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetHolidayByDate",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/holidays/2025-12-25",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"holidays",
+								"2025-12-25"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateHoliday",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"date\": \"2025-12-25\",\r\n  \"description\": \"Navidad\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/holidays",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"holidays"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateHoliday",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"date\": \"2025-12-25\",\r\n  \"description\": \"Navidad\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/holidays/2025-12-25",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"holidays",
+								"2025-12-25"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteHoliday",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/holidays/2025-12-25",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"holidays",
+								"2025-12-25"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "### 🎉 **Holiday Management**\n\nGestión de días festivos del calendario laboral.\n\n#### Endpoints Disponibles:\n\n- `GET /api/v1/holidays` - Obtener todos los días festivos\n    \n- `GET /api/v1/holidays/{date}` - Obtener festivo por fecha\n    \n- `POST /api/v1/holidays` - Crear nuevo día festivo\n    \n- `PUT /api/v1/holidays/{date}` - Actualizar día festivo\n    \n- `DELETE /api/v1/holidays/{date}` - Eliminar día festivo"
+		},
+		{
+			"name": "Vacation",
+			"item": [
+				{
+					"name": "GetAllVacations",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.json()[0].id)\r",
+									"    pm.collectionVariables.set(\"VACATION_ID\", pm.response.json()[0].id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/vacations",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"vacations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetVacationsById",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"VACATION_ID\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/vacations/{{VACATION_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"vacations",
+								"{{VACATION_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetVacationsDateRange",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/vacations?startDate=2026-06-01&endDate=2026-06-12",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"vacations"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2026-06-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2026-06-12"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateVacation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"VACATION_ID\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const employeeId = pm.collectionVariables.get(\"EMPLOYEE_ID\");\r",
+									"\r",
+									"let body = JSON.parse(pm.request.body.raw);\r",
+									"\r",
+									"// Validacion simple\r",
+									"if (!employeeId) {\r",
+									"  console.warn(\"⚠️ EMPLOYEE_ID no está definido en el entorno\");\r",
+									"  throw new Error(\"El Id del empleado no está definido en las variables de entorno de postman\")\r",
+									"} else{\r",
+									"    body.employee_id = employeeId;\r",
+									"}\r",
+									"\r",
+									"pm.request.body.raw = JSON.stringify(body, null, 2);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"employee_id\": \"1\",\r\n  \"startDate\": \"2026-06-01\",\r\n  \"endDate\": \"2026-06-12\",\r\n  \"status\": \"PENDING\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/vacations",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"vacations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateVacation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"VACATION_ID\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"startDate\": \"2025-06-01\",\r\n  \"endDate\": \"2025-06-12\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/vacations/08ca10a2-0d11-47e4-84a1-a9451e8cda65",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"vacations",
+								"08ca10a2-0d11-47e4-84a1-a9451e8cda65"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateVacation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/vacations/{{VACATION_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"vacations",
+								"{{VACATION_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "### 🏖️ **Vacation Management**\n\nGestión de períodos vacacionales de empleados.\n\n#### Endpoints Disponibles:\n\n- `GET /api/v1/vacations` - Obtener todas las vacaciones\n    \n- `GET /api/v1/vacations/{id}` - Obtener vacación por ID\n    \n- `GET /api/v1/vacations?startDate={date}&endDate={date}` - Filtrar por rango de fechas\n    \n- `POST /api/v1/vacations` - Crear período vacacional\n    \n- `PUT /api/v1/vacations/{id}` - Actualizar vacación\n    \n- `DELETE /api/v1/vacations/{id}` - Eliminar vacación"
+		},
+		{
+			"name": "Attendance",
+			"item": [
+				{
+					"name": "GetAllAttendances",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.json()[0].id)\r",
+									"    pm.collectionVariables.set(\"ATTENDANCE_ID\", pm.response.json()[0].id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/atendances",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"atendances"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAttendanceById",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ATTENDANCE_ID\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/atendances/{{ATTENDANCE_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"atendances",
+								"{{ATTENDANCE_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAttendancesByEmployeeId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ATTENDANCE_ID\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/atendances/employee/{{EMPLOYEE_ID}}?startDate=2025-06-01&endDate=2025-06-12",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"atendances",
+								"employee",
+								"{{EMPLOYEE_ID}}"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-06-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-06-12"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAttendancesByDates",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ATTENDANCE_ID\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/atendances?startDate=2025-06-01&endDate=2025-06-30",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"atendances"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-06-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-06-30"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAttendancesByStatus",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ATTENDANCE_ID\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/atendances?status=ABSENT&startDate=2025-06-01&endDate=2025-06-30",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"atendances"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "ABSENT"
+								},
+								{
+									"key": "startDate",
+									"value": "2025-06-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-06-30"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAttendancesByOrigin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ATTENDANCE_ID\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/atendances?origin=REGULAR&startDate=2025-06-01&endDate=2025-06-30",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"atendances"
+							],
+							"query": [
+								{
+									"key": "origin",
+									"value": "REGULAR"
+								},
+								{
+									"key": "startDate",
+									"value": "2025-06-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-06-30"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateAttendance",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"ATTENDANCE_ID\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"employeeId\": \"{{EMPLOYEE_ID}}\",\r\n  \"date\": \"2025-06-12\",\r\n  \"status\": \"PENDING\",\r\n  \"origin\": \"REGULAR\",\r\n  \"scheduleNotes\": \"Turno creado manualmente\",\r\n  \"attendancePeriods\": [\r\n    {\r\n      \"periodOrder\": 1,\r\n      \"scheduledCheckIn\": \"08:00\",\r\n      \"scheduledCheckOut\": \"12:00\",\r\n      \"scheduledBreakStart\": \"10:00\",\r\n      \"scheduledBreakEnd\": \"10:15\",\r\n      \"toleranceMinutes\": 5,\r\n      \"status\": \"PENDING\",\r\n      \"autoclosed\": false\r\n    },\r\n    {\r\n      \"periodOrder\": 2,\r\n      \"scheduledCheckIn\": \"13:00\",\r\n      \"scheduledCheckOut\": \"17:00\",\r\n      \"toleranceMinutes\": 5,\r\n      \"actualCheckIn\": \"13:05\",\r\n      \"actualCheckOut\": \"17:00\",\r\n      \"status\": \"PENDING\",\r\n      \"autoclosed\": false\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/atendances",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"atendances"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Permisison",
+			"item": [
+				{
+					"name": "GetAllPermissions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.json()[0].id)\r",
+									"    pm.collectionVariables.set(\"PERMISSION_ID\", pm.response.json()[0].id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/permissions",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"permissions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetPermissionById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/permissions/72b1a936-6785-4952-92d8-22af52da5bab",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"permissions",
+								"72b1a936-6785-4952-92d8-22af52da5bab"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeletePermission",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/permissions/66f464d8-0472-44bd-ae8c-d0ad86ccf427",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"permissions",
+								"66f464d8-0472-44bd-ae8c-d0ad86ccf427"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdatePermission",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"startDate\": \"2025-06-01\",\r\n  \"endDate\": \"2025-06-05\",\r\n  \"reason\": \"Vacaciones\",\r\n  \"status\": \"PENDING\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/permissions/82b1a936-6785-4952-92d8-22af52da5bab",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"permissions",
+								"82b1a936-6785-4952-92d8-22af52da5bab"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreatePermission",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"PERMISSION_ID\", pm.response.json().id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"employee\": \"{{EMPLOYEE_ID}}\",\r\n  \"date\": \"2025-06-20\",\r\n  \"type\": \"PARTIAL_SCHEDULE_CHANGE\",\r\n  \"reason\": \"Asunto familiar\",\r\n  \"notes\": \"Cita legal en la tarde\",\r\n  \"status\": \"PENDING\",\r\n  \"timeRanges\": [\r\n    {\r\n      \"periodOrder\": 1,\r\n      \"scheduledCheckIn\": \"08:00\",\r\n      \"scheduledCheckOut\": \"17:00\",\r\n      \"scheduledBreakStart\": \"14:00\",\r\n      \"scheduledBreakEnd\": \"15:00\",\r\n      \"toleranceMinutes\": 5,\r\n      \"hours\": 3.75\r\n    }\r\n  ],\r\n  \"hoursToCompensate\": 3.75,\r\n  \"compensationScheduled\": false,\r\n  \"shiftCompensations\": [\r\n    {\r\n      \"compensationDate\": \"2025-06-21\",\r\n      \"periodOrder\": 1,\r\n      \"scheduledCheckIn\": \"14:00\",\r\n      \"scheduledCheckOut\": \"18:00\",\r\n      \"scheduledBreakStart\": \"16:00\",\r\n      \"scheduledBreakEnd\": \"16:15\",\r\n      \"toleranceMinutes\": 5,\r\n      \"compensationHours\": 3.75,\r\n      \"status\": \"PENDING\",\r\n      \"notes\": \"Compensación por permiso del 11 de junio\"\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/permissions",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"permissions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeclinePermission",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/permissions/decline/{{PERMISSION_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"permissions",
+								"decline",
+								"{{PERMISSION_ID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ApprovePermission",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/permissions/approve/{{PERMISSION_ID}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"permissions",
+								"approve",
+								"{{PERMISSION_ID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "### 📝 **Permission Management**\n\nGestión de permisos y ausencias laborales.\n\n#### Endpoints Disponibles:\n\n- `GET /api/v1/permissions` - Obtener todos los permisos\n    \n- `GET /api/v1/permissions/{id}` - Obtener permiso por ID\n    \n- `POST /api/v1/permissions` - Crear nuevo permiso\n    \n- `PUT /api/v1/permissions/{id}` - Actualizar permiso\n    \n- `DELETE /api/v1/permissions/{id}` - Eliminar permiso\n    \n\n#### Estructura de Datos:\n\n``` json\n{\n  \"employee\": \"012120cc-5a73-4a60-8630-d5cd44575736\",\n  \"startDate\": \"2025-06-01\",\n  \"endDate\": \"2025-06-05\",\n  \"reason\": \"Vacaciones personales\",\n  \"authorizedById\": \"1\",\n  \"status\": \"APPROVED\"\n}\n\n ```"
+		},
+		{
+			"name": "CheckAttendance",
+			"item": [
+				{
+					"name": "CreateCheck",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"identifier\": \"EMP001\",\r\n    \"password\": \"contraseña123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/check",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"check"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "### 🕐 **Check Attendance**\n\nSistema de fichaje de entrada y salida.\n\n#### Endpoints Disponibles:\n\n- `POST /api/v1/check` - Registrar entrada/salida\n    \n\n#### Estructura de Datos:\n\n``` json\n{\n  \"identifier\": \"EMP001\",\n  \"password\": \"contraseña123\"\n}\n\n ```"
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "GetAllUsers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.json()[0].id)\r",
+									"    pm.collectionVariables.set(\"USER_ID\", pm.response.json()[0].id);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/users",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetUserById",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/users/f1ebf19b-7f44-416d-b68f-b3a69d4713f7",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"f1ebf19b-7f44-416d-b68f-b3a69d4713f7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "CreateUser",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"EMPLOYEE_ID\", pm.response.json().id);\r",
+									"let body = pm.request.body.raw;\r",
+									"let jsonBody = JSON.parse(body);\r",
+									"pm.collectionVariables.set(\"EMPLOYEE_IDENTIFIER\", jsonBody.identifier);\r",
+									"pm.collectionVariables.set(\"EMPLOYEE_PASSWORD\", jsonBody.password);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let shiftId = pm.environment.get(\"SHIFT_ID\") || \"2b3ba2ab-14dc-4227-b212-f89cdefeee79\";\r",
+									"pm.variables.set(\"FINAL_SHIFT_ID\", shiftId);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"test\",\r\n  \"password\": \"123456\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/users",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateUser",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"test1\",\r\n  \"password\": \"123456\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/users/f1ebf19b-7f44-416d-b68f-b3a69d4713f7",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"f1ebf19b-7f44-416d-b68f-b3a69d4713f7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteUser",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"identifier\": \"EMP001\",\r\n  \"name\": \"Laura Martínez\",\r\n  \"password\": \"contraseña123\",\r\n  \"phoneNumber\": \"+521112223334\",\r\n  \"fingerprint\": \"huella123\",\r\n  \"hireDate\": \"2024-06-01T00:00:00.000Z\",\r\n  \"isActive\": true,\r\n  \"initialShiftId\": \"c1bb7330-eea3-42e5-8cae-e3ac169e24a0\",\r\n  \"initialShiftStartDate\": \"2024-06-03T08:00:00.000Z\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/users/f1ebf19b-7f44-416d-b68f-b3a69d4713f7",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"f1ebf19b-7f44-416d-b68f-b3a69d4713f7"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reports",
+			"item": [
+				{
+					"name": "Attendances",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/v1/atendances/report?startDate=2025-06-01&endDate=2025-07-30&employeeId=63b19445-663a-4229-9286-649d40d10c15&origin=PERMISSION_DAY",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"atendances",
+								"report"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-06-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-07-30"
+								},
+								{
+									"key": "employeeId",
+									"value": "63b19445-663a-4229-9286-649d40d10c15"
+								},
+								{
+									"key": "origin",
+									"value": "PERMISSION_DAY"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:3005",
+			"type": "string"
+		},
+		{
+			"key": "SHIFT_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "DAILY_SHIFT_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "WORK_PERIOD_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "EMPLOYEE_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "EMPLOYEE_IDENTIFIER",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "EMPLOYEE_PASSWORD",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ATTENDANCE_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "ATTENDANCE_PERIOD_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "HOLIDAY_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "VACATION_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "PERMISSION_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "TYPES",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
