@@ -1,4 +1,4 @@
-import { IBrandRepository } from "../repositories/Brand/BrandRepository";
+import { IBrandRepository } from "../repositories/Attribute/AttributeRepository";
 import { CreateBrandDto, UpdateBrandDto } from "../types/brand.types";
 import { Brand } from "../entities/Brand";
 import { NotFoundError } from "../utils/errors";

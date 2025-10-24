@@ -1,6 +1,12 @@
-import { Entity, ManyToOne, Property } from "@mikro-orm/core";
+import {
+  Collection,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  Property,
+} from "@mikro-orm/core";
 import { BaseEntity } from "./BaseEntity";
-import { Product } from "./index";
+import { Product, ModelVariant } from "./index";
 
 @Entity()
 export class Model extends BaseEntity {
@@ -9,4 +15,7 @@ export class Model extends BaseEntity {
 
   @ManyToOne(() => Product)
   product!: Product;
+
+  @OneToMany(() => ModelVariant, (variant) => variant.model)
+  variants = new Collection<ModelVariant>(this);
 }

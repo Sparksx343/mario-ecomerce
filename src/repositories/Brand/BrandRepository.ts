@@ -1,4 +1,4 @@
-import { Brand } from "../../entities/Brand";
+import { Brand } from "../../entities/index";
 import { CreateBrandDto, UpdateBrandDto } from "../../types/brand.types";
 
 export interface IBrandRepository {

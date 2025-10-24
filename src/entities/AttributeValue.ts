@@ -1,12 +1,15 @@
 import { Entity, ManyToOne, Property } from "@mikro-orm/core";
 import { BaseEntity } from "./BaseEntity";
-import { Attribute } from "./Attribute";
+import { Attribute, Unit } from "./index";
 
 @Entity()
 export class AttributeValue extends BaseEntity {
   @ManyToOne(() => Attribute)
   attribute!: Attribute;
 
-  @Property({ unique: true })
+  @Property()
   value!: string;
+
+  @ManyToOne(() => Unit, { nullable: true })
+  unit?: Unit;
 }

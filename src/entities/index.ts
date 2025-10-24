@@ -1,14 +1,17 @@
 import { Cron } from "./Cron";
 import { CronLog } from "./CronLog";
-import { Category } from "./Category";
-import { Brand } from "./Brand";
-import { Product } from "./Product";
-import { Model } from "./Model";
 import { Attribute } from "./Attribute";
 import { AttributeValue } from "./AttributeValue";
-import { Variant } from "./Variant";
-import { VariantAttribute } from "./VariantAttribute";
-import { VariantAttributeValue } from "./VariantAttributeValue";
+import { Brand } from "./Brand";
+import { Category } from "./Category";
+import { Discount } from "./Discount";
+import { Model } from "./Model";
+import { ModelVariant } from "./ModelVariant";
+import { ModelVariantAttributeValue } from "./ModelVariantAttributeValue";
+import { ModelVariantImage } from "./ModelVariantImage";
+import { Product } from "./Product";
+import { ProductReview } from "./ProductReview";
+import { Unit } from "./Unit";
 
 export {
   Cron,
@@ -17,9 +20,12 @@ export {
   Brand,
   Product,
   Model,
+  ModelVariant,
+  ModelVariantAttributeValue,
+  ModelVariantImage,
   Attribute,
   AttributeValue,
-  Variant,
-  VariantAttribute,
-  VariantAttributeValue,
+  Unit,
+  Discount,
+  ProductReview,
 };
