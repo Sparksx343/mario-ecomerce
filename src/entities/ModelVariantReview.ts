@@ -3,7 +3,7 @@ import { ModelVariant } from "./index";
 import { BaseEntity } from "./BaseEntity";
 
 @Entity()
-export class ProductReview extends BaseEntity {
+export class ModelVariantReview extends BaseEntity {
   @ManyToOne(() => ModelVariant)
   modelVariant!: ModelVariant;
 

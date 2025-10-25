@@ -10,7 +10,7 @@ import { ModelVariant } from "./ModelVariant";
 import { ModelVariantAttributeValue } from "./ModelVariantAttributeValue";
 import { ModelVariantImage } from "./ModelVariantImage";
 import { Product } from "./Product";
-import { ProductReview } from "./ProductReview";
+import { ModelVariantReview } from "./ModelVariantReview";
 import { Unit } from "./Unit";
 
 export {
@@ -27,5 +27,5 @@ export {
   AttributeValue,
   Unit,
   Discount,
-  ProductReview,
+  ModelVariantReview,
 };

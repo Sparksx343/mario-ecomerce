@@ -13,7 +13,7 @@ import {
   AttributeValue,
   Unit,
   Discount,
-  ProductReview,
+  ModelVariantReview,
 } from "./entities/index";
 import { DB_CONFIG } from "./config/constants";
 
@@ -37,7 +37,7 @@ export default defineConfig({
     AttributeValue,
     Unit,
     Discount,
-    ProductReview,
+    ModelVariantReview,
   ],
   migrations: {
     pathTs: "./src/migrations",

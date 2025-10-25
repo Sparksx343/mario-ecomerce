@@ -15,8 +15,12 @@ export class ModelVariant extends BaseEntity {
 
   @Property()
   price!: number;
+
   @Property()
   stock!: number;
+
+  @Property()
+  averageRating!: number;
 
   @ManyToOne(() => Model)
   model!: Model;

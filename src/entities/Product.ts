@@ -13,6 +13,6 @@ export class Product extends BaseEntity {
   @ManyToOne(() => Category)
   category!: Category;
 
-  @Property()
+  @Property({ nullable: true })
   imageUrl?: string;
 }
